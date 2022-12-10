@@ -1,0 +1,12 @@
+{
+  "name": "autocrypt",
+  "version": "1.0.0",
+  "description": "auto encrypt all incoming files inside a specified directory",
+  "export": "./lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Husam Ahmed <husam999h@gmail.com>",
+  "license": "MIT"
+}
