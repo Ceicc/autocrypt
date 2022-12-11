@@ -12,6 +12,10 @@
   "license": "MIT",
   "devDependencies": {
     "@sindresorhus/tsconfig": "~3.0.1",
-    "@types/node": "~18.11.12"
+    "@types/node": "~18.11.12",
+    "@types/yargs": "~17.0.17"
+  },
+  "dependencies": {
+    "yargs": "~17.6.2"
   }
 }
