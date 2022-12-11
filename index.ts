@@ -1,11 +1,36 @@
 import { watch, stat } from "node:fs/promises"
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { createReadStream, createWriteStream } from "node:fs";
 import { spawn } from "node:child_process";
 
-const currenDir = dirname(fileURLToPath(import.meta.url))
-const encryptionKey = 'test'
+import yargs from "yargs"
+import { hideBin } from "yargs/helpers";
+
+const {program, directory, key} = await yargs(hideBin(process.argv))
+	.scriptName("Autocrypt")
+	.strict()
+	.option('directory', {
+		alias: 'd',
+		describe: "The directory path to watch",
+		string: true,
+		demandOption: true,
+		coerce: resolve,
+	})
+	.option('key', {
+		alias: 'k',
+		describe: "The encryption key",
+		string: true,
+		demandOption: true,
+	})
+	.option('program', {
+		alias: 'p',
+		describe: "Program name to use for encrypting files",
+		string: true,
+		default: 'xor',
+	})
+	.argv
+
+
 const ac = new AbortController()
 
 process.on('SIGINT', () => {
@@ -14,17 +39,17 @@ process.on('SIGINT', () => {
 })
 
 try {
-	const watcher = watch(currenDir, { signal: ac.signal });
-	console.log(`watching dir: ${currenDir}`)
+	const watcher = watch(directory, { signal: ac.signal });
+	console.log(`watching dir: ${directory}`)
 
 	for await (const event of watcher) {
 		console.log(event);
 
-		if (event.filename.endsWith('.xor') || event.eventType === "change") {
+		if (event.filename.endsWith(`.${program}`) || event.eventType === "change") {
 			continue
 		}
 
-		const fileName = resolve(currenDir, event.filename)
+		const fileName = resolve(directory, event.filename)
 
 		let fileStat
 		try {
@@ -48,7 +73,7 @@ try {
 
 		console.log(`spawning child process to encrypt file ${fileName}`)
 
-		const xorProcessor = spawn('xor', [encryptionKey], {
+		const child = spawn(program, [key], {
 			stdio: [
 				'pipe',
 				'pipe',
@@ -56,10 +81,10 @@ try {
 			] 
 		})
 
-		createReadStream(fileName).pipe(xorProcessor.stdin)
-		xorProcessor.stdout.pipe(createWriteStream(`${fileName}.xor`))
+		createReadStream(fileName).pipe(child.stdin)
+		child.stdout.pipe(createWriteStream(`${fileName}.${program}`))
 
-		xorProcessor.on('close', () => {
+		child.on('close', () => {
 			// remove original file
 			spawn('rm', [fileName])
 		})
