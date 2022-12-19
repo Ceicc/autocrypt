@@ -1,0 +1,36 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Setup latest Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: pnpm
+
+      - name: Clean install
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for linting errors
+        run: pnpm run lint
+
+      - name: Check for typing errors
+        run: pnpm run build --noEmit
