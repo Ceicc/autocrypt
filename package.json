@@ -1,5 +1,5 @@
 {
-  "name": "autocrypt",
+  "name": "@ceicc/autocrypt",
   "version": "1.0.0",
   "description": "auto encrypt all incoming files inside a specified directory",
   "export": "./dist/index.js",
@@ -12,6 +12,16 @@
   "keywords": [],
   "author": "Husam Ahmed <husam999h@gmail.com>",
   "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ],
   "devDependencies": {
     "@sindresorhus/tsconfig": "~3.0.1",
     "@types/node": "~18.11.12",
