@@ -5,19 +5,32 @@ name: Node.js CI
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
-  lint:
-    name: Check for linting errors
+  ci:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js version 18.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run lint
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup latest Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: npm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Clean install
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for linting errors
+        run: pnpm run lint
+
+      - name: Check for typing errors
+        run: pnpm run build --noEmit
