@@ -6,9 +6,9 @@ Auto encrypt all incoming files inside a specified directory
 Installing
 ----------
 
-```
-git clone https://github.com/Ceicc/autoscript
-cd autocrypjt
+```sh
+git clone https://github.com/Ceicc/autocrypt.git
+cd autocrypt
 npm install
 npm run build
 ```

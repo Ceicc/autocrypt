@@ -41,10 +41,9 @@ try {
 	console.log(`watching dir: ${directory}`);
 
 	for await (const event of watcher) {
-		console.log(event);
-
 		if (
 			event.filename.endsWith(`.${program}`) ||
+			event.filename.endsWith(".crdownload") ||
 			event.eventType === "change"
 		) {
 			continue;
