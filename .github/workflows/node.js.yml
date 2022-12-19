@@ -15,16 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
       - name: Setup latest Node.js
         uses: actions/setup-node@v3
         with:
           node-version: latest
           cache: pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
 
       - name: Clean install
         run: pnpm install --frozen-lockfile
