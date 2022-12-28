@@ -3,87 +3,68 @@ import { resolve } from "node:path";
 import { createReadStream, createWriteStream } from "node:fs";
 import { spawn } from "node:child_process";
 
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
+type AutocryptOptions = {
+	directory: string;
+	key: string;
+	program?: string;
+	signal?: AbortSignal;
+	onDetectFile?: (arg0: string) => void;
+};
 
-const { program, directory, key } = await yargs(hideBin(process.argv))
-	.scriptName("Autocrypt")
-	.strict()
-	.option("directory", {
-		alias: "d",
-		describe: "The directory path to watch",
-		string: true,
-		demandOption: true,
-		coerce: resolve,
-	})
-	.option("key", {
-		alias: "k",
-		describe: "The encryption key",
-		string: true,
-		demandOption: true,
-	})
-	.option("program", {
-		alias: "p",
-		describe: "Program name to use for encrypting files",
-		string: true,
-		default: "xor",
-	}).argv;
+export default async function autocrypt({
+	directory,
+	key,
+	program = "xor",
+	signal = new AbortController().signal,
+	onDetectFile = () => undefined,
+}: AutocryptOptions) {
+	try {
+		const watcher = watch(directory, { signal });
 
-const ac = new AbortController();
+		for await (const event of watcher) {
+			if (
+				event.filename.endsWith(`.${program}`) ||
+				event.filename.endsWith(".crdownload") ||
+				event.eventType === "change"
+			) {
+				continue;
+			}
 
-process.on("SIGINT", () => {
-	console.error("Captured SIGINT");
-	ac.abort();
-});
+			const fileName = resolve(directory, event.filename);
 
-try {
-	const watcher = watch(directory, { signal: ac.signal });
-	console.log(`watching dir: ${directory}`);
+			let fileStat;
+			try {
+				fileStat = await stat(fileName);
+			} catch (error: any) {
+				if (error.code === "ENOENT") continue;
+				else throw new Error(error);
+			}
 
-	for await (const event of watcher) {
-		if (
-			event.filename.endsWith(`.${program}`) ||
-			event.filename.endsWith(".crdownload") ||
-			event.eventType === "change"
-		) {
-			continue;
+			if (fileStat.isDirectory()) {
+				console.error(`${fileName}: Cannot watch events on nested directories`);
+				continue;
+			}
+
+			if (!fileStat.isFile()) {
+				console.error(`${fileName}: Unknown file type`);
+				continue;
+			}
+
+			onDetectFile(fileName);
+			const child = spawn(program, [key], {
+				stdio: ["pipe", "pipe", "inherit"],
+			});
+
+			createReadStream(fileName).pipe(child.stdin);
+			child.stdout.pipe(createWriteStream(`${fileName}.${program}`));
+
+			child.on("close", () => {
+				// Remove original file
+				spawn("rm", [fileName]);
+			});
 		}
-
-		const fileName = resolve(directory, event.filename);
-
-		let fileStat;
-		try {
-			fileStat = await stat(fileName);
-		} catch (error: any) {
-			if (error.code === "ENOENT") continue;
-			else throw new Error(error);
-		}
-
-		if (fileStat.isDirectory()) {
-			console.error(`${fileName}: Cannot watch events on nested directories`);
-			continue;
-		}
-
-		if (!fileStat.isFile()) {
-			console.error(`${fileName}: Unknown file type`);
-			continue;
-		}
-
-		console.log(`spawning child process to encrypt file ${fileName}`);
-
-		const child = spawn(program, [key], {
-			stdio: ["pipe", "pipe", "inherit"],
-		});
-
-		createReadStream(fileName).pipe(child.stdin);
-		child.stdout.pipe(createWriteStream(`${fileName}.${program}`));
-
-		child.on("close", () => {
-			// Remove original file
-			spawn("rm", [fileName]);
-		});
+	} catch (err: any) {
+		if (err?.name === "AbortError") return;
+		throw new Error(err);
 	}
-} catch (err: any) {
-	if (err?.name === "AbortError") console.log("aborted");
-	else throw new Error(err);
 }
