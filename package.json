@@ -14,7 +14,7 @@
   },
   "scripts": {
     "start": "node ./dist/index.js",
-    "lint": "eslint index.ts",
+    "lint": "eslint src/*",
     "build": "tsc"
   },
   "keywords": [],
