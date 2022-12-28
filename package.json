@@ -10,7 +10,7 @@
     }
   },
   "bin": {
-    "autocrypt": "./dist/index.js"
+    "autocrypt": "./dist/bin.js"
   },
   "scripts": {
     "start": "node ./dist/index.js",
