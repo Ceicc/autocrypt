@@ -2,8 +2,16 @@
   "name": "@ceicc/autocrypt",
   "version": "1.0.0",
   "description": "auto encrypt all incoming files inside a specified directory",
-  "export": "./dist/index.js",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "autocrypt": "./dist/index.js"
+  },
   "scripts": {
     "start": "node ./dist/index.js",
     "lint": "eslint index.ts",
