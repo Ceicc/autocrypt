@@ -3,21 +3,23 @@
   "version": "1.1.0",
   "description": "auto encrypt all incoming files inside a specified directory",
   "type": "module",
+  "main": "./dict/index.js",
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
+  "types": "./dist/index.d.ts",
   "bin": {
     "autocrypt": "./dist/bin.js"
   },
   "scripts": {
-    "start": "node ./dist/index.js",
+    "start": "node ./dist/bin.js",
     "lint": "eslint src/*",
     "build": "tsc"
   },
-  "keywords": [],
+  "keywords": ["encryption", "security", "watcher"],
   "author": "Husam Ahmed <husam999h@gmail.com>",
   "license": "MIT",
   "private": false,
