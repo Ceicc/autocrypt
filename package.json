@@ -1,6 +1,6 @@
 {
   "name": "@ceicc/autocrypt",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "auto encrypt all incoming files inside a specified directory",
   "type": "module",
   "main": "./dict/index.js",
@@ -19,7 +19,11 @@
     "lint": "eslint src/*",
     "build": "tsc"
   },
-  "keywords": ["encryption", "security", "watcher"],
+  "keywords": [
+    "encryption",
+    "security",
+    "watcher"
+  ],
   "author": "Husam Ahmed <husam999h@gmail.com>",
   "license": "MIT",
   "private": false,
