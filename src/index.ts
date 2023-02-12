@@ -7,7 +7,7 @@ type AutocryptOptions = {
 	key: string;
 	program?: string;
 	signal?: AbortSignal;
-	onDetectFile?: (arg0: string) => void;
+	onDetectFile?: (fileName: string) => void;
 };
 
 export default async function autocrypt({

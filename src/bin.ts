@@ -41,7 +41,7 @@ autocrypt({
 	key,
 	program,
 	signal: ac.signal,
-	onDetectFile() {
-		console.log(`spawning child process to encrypt file $`);
+	onDetectFile(fileName) {
+		console.log(`spawning child process to encrypt file ${fileName}`);
 	},
 }).catch(console.error);
