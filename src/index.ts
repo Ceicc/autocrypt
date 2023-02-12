@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream } from "node:fs";
+import { createReadStream, createWriteStream, rm } from "node:fs";
 import { spawn } from "node:child_process";
 import { watch } from "chokidar";
 
@@ -33,8 +33,11 @@ export default async function autocrypt({
 		child.stdout.pipe(createWriteStream(`${fileName}.${program}`));
 
 		child.on("close", () => {
-			// Remove original file
-			spawn("rm", [fileName]);
+			rm(fileName, (err) => {
+				if (err) {
+					console.error(err);
+				}
+			});
 		});
 	});
 }
