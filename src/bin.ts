@@ -44,4 +44,4 @@ autocrypt({
 	onDetectFile(fileName) {
 		console.log(`spawning child process to encrypt file ${fileName}`);
 	},
-}).catch(console.error);
+});

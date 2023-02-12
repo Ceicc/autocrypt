@@ -10,7 +10,7 @@ type AutocryptOptions = {
 	onDetectFile?: (fileName: string) => void;
 };
 
-export default async function autocrypt({
+export default function autocrypt({
 	directory,
 	key,
 	program = "xor",
