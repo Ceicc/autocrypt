@@ -1,70 +1,43 @@
-import { watch, stat } from "node:fs/promises";
-import { resolve } from "node:path";
-import { createReadStream, createWriteStream } from "node:fs";
+import { createReadStream, createWriteStream, rm } from "node:fs";
 import { spawn } from "node:child_process";
+import { watch } from "chokidar";
 
 type AutocryptOptions = {
 	directory: string;
 	key: string;
 	program?: string;
 	signal?: AbortSignal;
-	onDetectFile?: (arg0: string) => void;
+	onDetectFile?: (fileName: string) => void;
 };
 
-export default async function autocrypt({
+export default function autocrypt({
 	directory,
 	key,
 	program = "xor",
 	signal = new AbortController().signal,
 	onDetectFile = () => undefined,
 }: AutocryptOptions) {
-	try {
-		const watcher = watch(directory, { signal });
+	const watcher = watch(directory, {
+		ignored: [new RegExp(`.${program}$`), /\.crdownload$/],
+	});
 
-		for await (const event of watcher) {
-			if (
-				event.filename.endsWith(`.${program}`) ||
-				event.filename.endsWith(".crdownload") ||
-				event.eventType === "change"
-			) {
-				continue;
-			}
+	signal.addEventListener("abort", watcher.close.bind(watcher));
 
-			const fileName = resolve(directory, event.filename);
+	watcher.on("add", (fileName) => {
+		onDetectFile(fileName);
+		const child = spawn(program, [key], {
+			stdio: ["pipe", "pipe", "inherit"],
+		});
 
-			let fileStat;
-			try {
-				fileStat = await stat(fileName);
-			} catch (error: any) {
-				if (error.code === "ENOENT") continue;
-				else throw new Error(error);
-			}
+		createReadStream(fileName).pipe(child.stdin);
+		child.stdout.pipe(createWriteStream(`${fileName}.${program}`));
 
-			if (fileStat.isDirectory()) {
-				console.error(`${fileName}: Cannot watch events on nested directories`);
-				continue;
-			}
-
-			if (!fileStat.isFile()) {
-				console.error(`${fileName}: Unknown file type`);
-				continue;
-			}
-
-			onDetectFile(fileName);
-			const child = spawn(program, [key], {
-				stdio: ["pipe", "pipe", "inherit"],
+		child.on("close", () => {
+			rm(fileName, (err) => {
+				if (err) {
+					console.error(err);
+				}
 			});
-
-			createReadStream(fileName).pipe(child.stdin);
-			child.stdout.pipe(createWriteStream(`${fileName}.${program}`));
-
-			child.on("close", () => {
-				// Remove original file
-				spawn("rm", [fileName]);
-			});
-		}
-	} catch (err: any) {
-		if (err?.name === "AbortError") return;
-		throw new Error(err);
-	}
+		});
+	});
 }

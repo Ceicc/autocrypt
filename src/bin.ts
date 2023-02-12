@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import process from "node:process";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import autocrypt from "./index.js";
@@ -40,7 +41,7 @@ autocrypt({
 	key,
 	program,
 	signal: ac.signal,
-	onDetectFile() {
-		console.log(`spawning child process to encrypt file $`);
+	onDetectFile(fileName) {
+		console.log(`spawning child process to encrypt file ${fileName}`);
 	},
-}).catch(console.error);
+});
