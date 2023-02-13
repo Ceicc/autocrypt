@@ -18,7 +18,7 @@ export default function autocrypt({
 	onDetectFile = () => undefined,
 }: AutocryptOptions) {
 	const watcher = watch(directory, {
-		ignored: [new RegExp(`.${program}$`), /\.crdownload$/],
+		ignored: [new RegExp(`\\.${program}$`), /\.crdownload$/],
 	});
 
 	signal.addEventListener("abort", watcher.close.bind(watcher));
