@@ -1,6 +1,6 @@
 {
   "name": "@ceicc/autocrypt",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "auto encrypt all incoming files inside a specified directory",
   "type": "module",
   "main": "./dict/index.js",
